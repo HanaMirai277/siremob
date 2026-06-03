@@ -16,5 +16,20 @@ namespace siremob.view
         {
             InitializeComponent();
         }
+
+        private void label1_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void button_Hapus_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void button_Batal_Click(object sender, EventArgs e)
+        {
+
+        }
     }
 }

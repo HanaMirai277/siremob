@@ -168,6 +168,9 @@
     <EmbeddedResource Include="view\mastermobil.resx">
       <DependentUpon>mastermobil.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="view\masterpelanggan.resx">
+      <DependentUpon>masterpelanggan.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="view\PengembalianPembayaran.resx">
       <DependentUpon>PengembalianPembayaran.cs</DependentUpon>
     </EmbeddedResource>
@@ -185,6 +188,8 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="assets\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
