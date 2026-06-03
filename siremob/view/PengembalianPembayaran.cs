@@ -10,9 +10,9 @@ using System.Windows.Forms;
 
 namespace siremob.view
 {
-    public partial class pengembalian_pembayaran : Form
+    public partial class PengembalianPembayaran : Form
     {
-        public pengembalian_pembayaran()
+        public PengembalianPembayaran()
         {
             InitializeComponent();
         }

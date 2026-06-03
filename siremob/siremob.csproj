@@ -141,11 +141,11 @@
     <Compile Include="view\masterpelanggan.Designer.cs">
       <DependentUpon>masterpelanggan.cs</DependentUpon>
     </Compile>
-    <Compile Include="view\pengembalian_pembayaran.cs">
+    <Compile Include="view\PengembalianPembayaran.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="view\pengembalian_pembayaran.Designer.cs">
-      <DependentUpon>pengembalian_pembayaran.cs</DependentUpon>
+    <Compile Include="view\PengembalianPembayaran.Designer.cs">
+      <DependentUpon>PengembalianPembayaran.cs</DependentUpon>
     </Compile>
     <Compile Include="view\transaksirental.cs">
       <SubType>Form</SubType>
@@ -167,6 +167,9 @@
     </Compile>
     <EmbeddedResource Include="view\mastermobil.resx">
       <DependentUpon>mastermobil.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="view\PengembalianPembayaran.resx">
+      <DependentUpon>PengembalianPembayaran.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
