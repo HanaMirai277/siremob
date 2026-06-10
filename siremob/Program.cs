@@ -1,4 +1,4 @@
-﻿using siremob.model;
+using siremob.model;
 using siremob.view;
 using System;
 using System.Collections.Generic;
@@ -18,7 +18,7 @@ namespace siremob
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new view.pengembalian_pembayaran());
+            Application.Run(new view.login());
         }
     }
 }

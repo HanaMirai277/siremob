@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -27,25 +27,41 @@ namespace siremob.view
         private void mastermobil_Load(object sender, EventArgs e)
         {
             TampilkanData();
+            if (Session.Role == "Karyawan")
+            {
+                button_Tambah.Enabled = false;
+                button_Ubah.Enabled = false;
+                button_Hapus.Enabled = false;
+                button_Browse.Enabled = false;
+                
+                tbx_IdMobil.ReadOnly = true;
+                tbx_PlatNomor.ReadOnly = true;
+                tbx_Merk.ReadOnly = true;
+                tbx_Tipe.ReadOnly = true;
+                tbx_Warna.ReadOnly = true;
+                tbx_Harga.ReadOnly = true;
+                nud_Tahun.Enabled = false;
+                comboBox_Status.Enabled = false;
+            }
         }
 
         private void TampilkanData()
         {
             try
             {
-                dataGridView_Mobil.AutoGenerateColumns = false;
+                dgv_Mobil.AutoGenerateColumns = false;
 
-                dataGridView_Mobil.Columns["colIdMobil"].DataPropertyName = "id_mobil";
-                dataGridView_Mobil.Columns["colPlatNomor"].DataPropertyName = "platnomor";
-                dataGridView_Mobil.Columns["colMerk"].DataPropertyName = "merk";
-                dataGridView_Mobil.Columns["colTipe"].DataPropertyName = "tipe";
-                dataGridView_Mobil.Columns["colTahun"].DataPropertyName = "tahun";
-                dataGridView_Mobil.Columns["colWarna"].DataPropertyName = "warna";
-                dataGridView_Mobil.Columns["colHarga"].DataPropertyName = "hargasewaperhari"; 
-                dataGridView_Mobil.Columns["colStatus"].DataPropertyName = "statusmobil";
+                dgv_Mobil.Columns["colIdMobil"].DataPropertyName = "id_mobil";
+                dgv_Mobil.Columns["colPlatNomor"].DataPropertyName = "platnomor";
+                dgv_Mobil.Columns["colMerk"].DataPropertyName = "merk";
+                dgv_Mobil.Columns["colTipe"].DataPropertyName = "tipe";
+                dgv_Mobil.Columns["colTahun"].DataPropertyName = "tahun";
+                dgv_Mobil.Columns["colWarna"].DataPropertyName = "warna";
+                dgv_Mobil.Columns["colHarga"].DataPropertyName = "hargasewaperhari"; 
+                dgv_Mobil.Columns["colStatus"].DataPropertyName = "statusmobil";
 
                 DataTable dt = _service.TampilData();
-                dataGridView_Mobil.DataSource = dt;
+                dgv_Mobil.DataSource = dt;
             }
             catch (Exception ex)
             {
@@ -57,48 +73,29 @@ namespace siremob.view
         {
             try
             {
-                if (string.IsNullOrWhiteSpace(textBox_IdMobil.Text) ||
-                    string.IsNullOrWhiteSpace(textBox_PlatNomor.Text) ||
-                    string.IsNullOrWhiteSpace(textBox_Merk.Text) ||
-                    string.IsNullOrWhiteSpace(textBox_Tipe.Text) ||
-                    string.IsNullOrWhiteSpace(textBox_Warna.Text) ||
-                    string.IsNullOrWhiteSpace(textBox_Harga.Text))
+                if (ApakahFormKosong())
                 {
                     MessageBox.Show("Semua field harus diisi!", "Validasi", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     return;
                 }
 
-                if (_service.CekIdMobil(textBox_IdMobil.Text))
+                if (_service.CekIdMobil(tbx_IdMobil.Text))
                 {
-                    MessageBox.Show("ID Mobil sudah terdaftar!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show("ID Mobil Sudah Terdaftar!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return;
                 }
 
-                if (_service.CekPlatNomor(textBox_PlatNomor.Text))
+                if (_service.CekPlatNomor(tbx_PlatNomor.Text))
                 {
-                    MessageBox.Show("Plat Nomor sudah terdaftar!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return;
+                    MessageBox.Show("Plat Nomor sudah terdaftar!", "Error", MessageBoxButtons.OK, MessageBox.Error);
                 }
 
-                model.mastermobil mm = new model.mastermobil();
-                mm.id_mobil = textBox_IdMobil.Text;
-                mm.platnomor = textBox_PlatNomor.Text;
-                mm.merk = textBox_Merk.Text;
-                mm.tipe = textBox_Tipe.Text;
-                mm.tahun = (int)numericUpDown_Tahun.Value;
-                mm.warna = textBox_Warna.Text;
-                mm.hargasewaperhari = decimal.Parse(textBox_Harga.Text);
-                mm.statusmobil = comboBox_Status.Text;
-                mm.foto = _fotoPath;
+                model.mastermobil mm = AmbilDataDariForm();
 
                 _service.TambahData(mm);
                 MessageBox.Show("Data berhasil ditambahkan!", "Sukses", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 BersihkanForm();
                 TampilkanData();
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Error: " + ex.Message, "Gagal Menambah Data", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -106,32 +103,32 @@ namespace siremob.view
         {
             try
             {
-                if (string.IsNullOrWhiteSpace(textBox_IdMobil.Text))
+                if (string.IsNullOrWhiteSpace(tbx_IdMobil.Text))
                 {
                     MessageBox.Show("Pilih data yang akan diubah!", "Validasi", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     return;
                 }
 
-                if (string.IsNullOrWhiteSpace(textBox_PlatNomor.Text) ||
-                    string.IsNullOrWhiteSpace(textBox_Merk.Text) ||
-                    string.IsNullOrWhiteSpace(textBox_Tipe.Text) ||
-                    string.IsNullOrWhiteSpace(textBox_Warna.Text) ||
-                    string.IsNullOrWhiteSpace(textBox_Harga.Text))
+                if (string.IsNullOrWhiteSpace(tbx_PlatNomor.Text) ||
+                    string.IsNullOrWhiteSpace(tbx_Merk.Text) ||
+                    string.IsNullOrWhiteSpace(tbx_Tipe.Text) ||
+                    string.IsNullOrWhiteSpace(tbx_Warna.Text) ||
+                    string.IsNullOrWhiteSpace(tbx_Harga.Text))
                 {
                     MessageBox.Show("Semua field harus diisi!", "Validasi", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     return;
                 }
 
                 model.mastermobil mm = new model.mastermobil();
-                mm.id_mobil = textBox_IdMobil.Text;
-                mm.platnomor = textBox_PlatNomor.Text;
-                mm.merk = textBox_Merk.Text;
-                mm.tipe = textBox_Tipe.Text;
-                mm.tahun = (int)numericUpDown_Tahun.Value;
-                mm.warna = textBox_Warna.Text;
-                mm.hargasewaperhari = decimal.Parse(textBox_Harga.Text);
+                mm.id_mobil = tbx_IdMobil.Text;
+                mm.platnomor = tbx_PlatNomor.Text;
+                mm.merk = tbx_Merk.Text;
+                mm.tipe = tbx_Tipe.Text;
+                mm.tahun = (int)nud_Tahun.Value;
+                mm.warna = tbx_Warna.Text;
+                mm.hargasewaperhari = decimal.Parse(tbx_Harga.Text);
                 mm.statusmobil = comboBox_Status.Text;
-                mm.foto = string.IsNullOrEmpty(_fotoPath) ? textBox_Foto.Text : _fotoPath;
+                mm.foto = string.IsNullOrEmpty(_fotoPath) ? pbx_Foto.ImageLocation : _fotoPath;
 
                 _service.UbahData(mm);
                 MessageBox.Show("Data berhasil diubah!", "Sukses", MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -148,7 +145,7 @@ namespace siremob.view
         {
             try
             {
-                if (string.IsNullOrWhiteSpace(textBox_IdMobil.Text))
+                if (string.IsNullOrWhiteSpace(tbx_IdMobil.Text))
                 {
                     MessageBox.Show("Pilih data yang akan dihapus!", "Validasi", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     return;
@@ -157,7 +154,7 @@ namespace siremob.view
                 DialogResult result = MessageBox.Show("Apakah Anda yakin ingin menghapus data ini?", "Konfirmasi", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
                 if (result == DialogResult.Yes)
                 {
-                    _service.HapusData(textBox_IdMobil.Text);
+                    _service.HapusData(tbx_IdMobil.Text);
                     MessageBox.Show("Data berhasil dihapus!", "Sukses", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     BersihkanForm();
                     TampilkanData();
@@ -176,18 +173,17 @@ namespace siremob.view
 
         private void BersihkanForm()
         {
-            textBox_IdMobil.Clear();
-            textBox_PlatNomor.Clear();
-            textBox_Merk.Clear();
-            textBox_Tipe.Clear();
-            numericUpDown_Tahun.Value = 2024;
-            textBox_Warna.Clear();
-            textBox_Harga.Clear();
+            tbx_IdMobil.Clear();
+            tbx_PlatNomor.Clear();
+            tbx_Merk.Clear();
+            tbx_Tipe.Clear();
+            nud_Tahun.Value = 2024;
+            tbx_Warna.Clear();
+            tbx_Harga.Clear();
             comboBox_Status.SelectedIndex = 0;
-            textBox_Foto.Clear();
-            pictureBox_Foto.Image = null;
+            pbx_Foto.Image = null;
             _fotoPath = "";
-            textBox_IdMobil.Focus();
+            tbx_IdMobil.Focus();
         }
 
         private void button_Browse_Click(object sender, EventArgs e)
@@ -201,11 +197,11 @@ namespace siremob.view
                 {
                     _fotoPath = ofd.FileName;
                     MessageBox.Show("Path: " + _fotoPath);
-                    textBox_Foto.Text = _fotoPath;
-                    pictureBox_Foto.Image = Image.FromFile(_fotoPath);
+                    pbx_Foto.Text = _fotoPath;
+                    pbx_Foto.Image = Image.FromFile(_fotoPath);
 
                     MessageBox.Show(
-                        pictureBox_Foto.Image == null
+                        pbx_Foto.Image == null
                         ? "Image NULL"
                         : "Image BERHASIL DIMUAT");
                 }
@@ -222,26 +218,26 @@ namespace siremob.view
             {
                 if (e.RowIndex >= 0)
                 {
-                    DataGridViewRow row = dataGridView_Mobil.Rows[e.RowIndex];
-                    textBox_IdMobil.Text = row.Cells["colIdMobil"].Value?.ToString();
-                    textBox_PlatNomor.Text = row.Cells["colPlatNomor"].Value?.ToString();
-                    textBox_Merk.Text = row.Cells["colMerk"].Value?.ToString();
-                    textBox_Tipe.Text = row.Cells["colTipe"].Value?.ToString();
-                    numericUpDown_Tahun.Value = Convert.ToInt32(row.Cells["colTahun"].Value);
-                    textBox_Warna.Text = row.Cells["colWarna"].Value?.ToString();
-                    textBox_Harga.Text = row.Cells["colHarga"].Value?.ToString();
+                    DataGridViewRow row = dgv_Mobil.Rows[e.RowIndex];
+                    tbx_IdMobil.Text = row.Cells["colIdMobil"].Value?.ToString();
+                    tbx_PlatNomor.Text = row.Cells["colPlatNomor"].Value?.ToString();
+                    tbx_Merk.Text = row.Cells["colMerk"].Value?.ToString();
+                    tbx_Tipe.Text = row.Cells["colTipe"].Value?.ToString();
+                    nud_Tahun.Value = Convert.ToInt32(row.Cells["colTahun"].Value);
+                    tbx_Warna.Text = row.Cells["colWarna"].Value?.ToString();
+                    tbx_Harga.Text = row.Cells["colHarga"].Value?.ToString();
                     comboBox_Status.Text = row.Cells["colStatus"].Value?.ToString();
 
                     string fotoPath = row.Cells["colFoto"].Value?.ToString() ?? "";
-                    textBox_Foto.Text = fotoPath;
+                    pbx_Foto.Text = fotoPath;
 
                     if (!string.IsNullOrEmpty(fotoPath) && File.Exists(fotoPath))
                     {
-                        pictureBox_Foto.Image = Image.FromFile(fotoPath);
+                        pbx_Foto.Image = Image.FromFile(fotoPath);
                     }
                     else
                     {
-                        pictureBox_Foto.Image = null;
+                        pbx_Foto.Image = null;
                     }
 
                     _fotoPath = "";
@@ -257,16 +253,16 @@ namespace siremob.view
         {
             try
             {
-                if (string.IsNullOrWhiteSpace(textBox_Cari.Text))
+                if (string.IsNullOrWhiteSpace(tbx_Cari.Text))
                 {
                     TampilkanData();
                 }
                 else
                 {
-                    dataGridView_Mobil.AutoGenerateColumns = false;
+                    dgv_Mobil.AutoGenerateColumns = false;
 
-                    DataTable dt = _service.CariData(textBox_Cari.Text);
-                    dataGridView_Mobil.DataSource = dt;
+                    DataTable dt = _service.CariData(tbx_Cari.Text);
+                    dgv_Mobil.DataSource = dt;
                 }
             }
             catch (Exception ex)
@@ -281,6 +277,11 @@ namespace siremob.view
         }
 
         private void pictureBox_Foto_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void tbx_IdMobil_TextChanged(object sender, EventArgs e)
         {
 
         }
