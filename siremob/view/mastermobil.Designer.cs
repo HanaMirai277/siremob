@@ -30,7 +30,7 @@
             this.label5 = new System.Windows.Forms.Label();
             this.tbx_Merk = new System.Windows.Forms.TextBox();
             this.label6 = new System.Windows.Forms.Label();
-            this.nud_tahun = new System.Windows.Forms.NumericUpDown();
+            this.nud_Tahun = new System.Windows.Forms.NumericUpDown();
             this.label7 = new System.Windows.Forms.Label();
             this.tbx_Warna = new System.Windows.Forms.TextBox();
             this.label10 = new System.Windows.Forms.Label();
@@ -59,7 +59,7 @@
             this.colStatus = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.panel1.SuspendLayout();
             this.panel2.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.nud_tahun)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.nud_Tahun)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pbx_Foto)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.dgv_Mobil)).BeginInit();
             this.SuspendLayout();
@@ -98,7 +98,7 @@
             this.panel2.Controls.Add(this.label5);
             this.panel2.Controls.Add(this.tbx_Merk);
             this.panel2.Controls.Add(this.label6);
-            this.panel2.Controls.Add(this.nud_tahun);
+            this.panel2.Controls.Add(this.nud_Tahun);
             this.panel2.Controls.Add(this.label7);
             this.panel2.Controls.Add(this.tbx_Warna);
             this.panel2.Controls.Add(this.label10);
@@ -132,6 +132,7 @@
             this.tbx_IdMobil.Name = "tbx_IdMobil";
             this.tbx_IdMobil.Size = new System.Drawing.Size(315, 35);
             this.tbx_IdMobil.TabIndex = 1;
+            this.tbx_IdMobil.TextChanged += new System.EventHandler(this.tbx_IdMobil_TextChanged);
             // 
             // label3
             // 
@@ -204,24 +205,24 @@
             this.label6.TabIndex = 8;
             this.label6.Text = "Tahun";
             // 
-            // nud_tahun
+            // nud_Tahun
             // 
-            this.nud_tahun.Font = new System.Drawing.Font("Arial", 10F);
-            this.nud_tahun.Location = new System.Drawing.Point(15, 311);
-            this.nud_tahun.Maximum = new decimal(new int[] {
+            this.nud_Tahun.Font = new System.Drawing.Font("Arial", 10F);
+            this.nud_Tahun.Location = new System.Drawing.Point(15, 311);
+            this.nud_Tahun.Maximum = new decimal(new int[] {
             2100,
             0,
             0,
             0});
-            this.nud_tahun.Minimum = new decimal(new int[] {
+            this.nud_Tahun.Minimum = new decimal(new int[] {
             1990,
             0,
             0,
             0});
-            this.nud_tahun.Name = "nud_tahun";
-            this.nud_tahun.Size = new System.Drawing.Size(89, 27);
-            this.nud_tahun.TabIndex = 9;
-            this.nud_tahun.Value = new decimal(new int[] {
+            this.nud_Tahun.Name = "nud_Tahun";
+            this.nud_Tahun.Size = new System.Drawing.Size(89, 27);
+            this.nud_Tahun.TabIndex = 9;
+            this.nud_Tahun.Value = new decimal(new int[] {
             2020,
             0,
             0,
@@ -529,7 +530,7 @@
             this.panel1.PerformLayout();
             this.panel2.ResumeLayout(false);
             this.panel2.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.nud_tahun)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.nud_Tahun)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pbx_Foto)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.dgv_Mobil)).EndInit();
             this.ResumeLayout(false);
@@ -551,7 +552,7 @@
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.TextBox tbx_Merk;
         private System.Windows.Forms.Label label6;
-        private System.Windows.Forms.NumericUpDown nud_tahun;
+        private System.Windows.Forms.NumericUpDown nud_Tahun;
         private System.Windows.Forms.Label label7;
         private System.Windows.Forms.TextBox tbx_Warna;
         private System.Windows.Forms.Label label8;
