@@ -108,6 +108,7 @@
     <Compile Include="model\mastermobil.cs" />
     <Compile Include="model\masterpelanggan.cs" />
     <Compile Include="model\pengembalian_pembayaran.cs" />
+    <Compile Include="model\Session.cs" />
     <Compile Include="model\transaksirental.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -116,12 +117,19 @@
     <Compile Include="service\mastermobil_serve.cs" />
     <Compile Include="service\masterpelanggan_serve.cs" />
     <Compile Include="service\pengembalian_pembayaran_serve.cs" />
+    <Compile Include="service\petugas_serve.cs" />
     <Compile Include="service\transaksirental_serve.cs" />
     <Compile Include="view\dashboard.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="view\dashboard.Designer.cs">
       <DependentUpon>dashboard.cs</DependentUpon>
+    </Compile>
+    <Compile Include="view\financial_reports.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="view\financial_reports.Designer.cs">
+      <DependentUpon>financial_reports.cs</DependentUpon>
     </Compile>
     <Compile Include="view\login.cs">
       <SubType>Form</SubType>
@@ -140,6 +148,12 @@
     </Compile>
     <Compile Include="view\masterpelanggan.Designer.cs">
       <DependentUpon>masterpelanggan.cs</DependentUpon>
+    </Compile>
+    <Compile Include="view\masterpetugas.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="view\masterpetugas.Designer.cs">
+      <DependentUpon>masterpetugas.cs</DependentUpon>
     </Compile>
     <Compile Include="view\pengembalian_pembayaran.cs">
       <SubType>Form</SubType>

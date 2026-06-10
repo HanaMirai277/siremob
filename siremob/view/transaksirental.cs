@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -8,55 +8,103 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using siremob.service;
+using siremob.konfigurasi;
+
 namespace siremob.view
 {
     public partial class transaksirental : Form
     {
-        // Instansiasi class service transaksi
         private transaksirental_serve sewaService = new transaksirental_serve();
-
-        // Variabel untuk menyimpan harga per hari mobil yang dipilih
         private decimal hargaMobilTerpilih = 0;
+        private string currentIdRental = "";
+
+        // Jaminan Controls
+        private ComboBox cmb_jaminan;
+        private Label lbl_jaminan;
 
         public transaksirental()
         {
             InitializeComponent();
+            
+            // Inject Jaminan controls dynamically
+            InisialisasiJaminanControl();
+
+            // Bind events
+            this.Load += new EventHandler(rental_Load);
+            btn_batal.Click += new EventHandler(btnBatal_Click);
+            btn_simpan.Click += new EventHandler(btnSimpan_Click);
+            btn_cari.Click += new EventHandler(btnCari_Click);
         }
 
-        // 1. EVENT SAAT FORM PERTAMA KALI DIBUKA
+        private void InisialisasiJaminanControl()
+        {
+            lbl_jaminan = new Label();
+            lbl_jaminan.Text = "Jaminan";
+            lbl_jaminan.Font = new Font("Arial", 10F);
+            lbl_jaminan.ForeColor = Color.White;
+            lbl_jaminan.Location = new Point(15, 310);
+            lbl_jaminan.AutoSize = true;
+
+            cmb_jaminan = new ComboBox();
+            cmb_jaminan.Location = new Point(15, 335);
+            cmb_jaminan.Size = new Size(315, 28);
+            cmb_jaminan.DropDownStyle = ComboBoxStyle.DropDownList;
+            cmb_jaminan.Items.Add("KTP");
+            cmb_jaminan.Items.Add("KK");
+            cmb_jaminan.Items.Add("Kendaraan Pribadi");
+            cmb_jaminan.SelectedIndex = -1;
+
+            panel2.Controls.Add(lbl_jaminan);
+            panel2.Controls.Add(cmb_jaminan);
+        }
+
         private void rental_Load(object sender, EventArgs e)
         {
+            // Bind grid columns property names
+            dgv_transaksi.AutoGenerateColumns = false;
+            dgv_transaksi.Columns["colIdMobil"].DataPropertyName = "id_rental";
+            dgv_transaksi.Columns["colPlatNomor"].DataPropertyName = "nama_pelanggan";
+            dgv_transaksi.Columns["colMerk"].DataPropertyName = "Mobil";
+            dgv_transaksi.Columns["colTipe"].DataPropertyName = "tanggalsewa";
+            dgv_transaksi.Columns["colTahun"].DataPropertyName = "tanggalkembali_rencana";
+            dgv_transaksi.Columns["colWarna"].DataPropertyName = "totalbiaya_estimasi";
+            dgv_transaksi.Columns["colHarga"].DataPropertyName = "statusrental";
+
             RefreshHalaman();
         }
 
-        // Fungsi untuk mengosongkan inputan dan menyegarkan tabel
         private void RefreshHalaman()
         {
             try
             {
-                // Tampilkan data riwayat transaksi di DataGridView
+                // Generate next rental ID
+                currentIdRental = sewaService.GetNextIdRental();
+                label1.Text = $"Transaksi Rental - {currentIdRental}";
+
+                // Refresh history grid
                 dgv_transaksi.DataSource = sewaService.TampilkanDaftarRental();
 
-                // Isi ComboBox Pelanggan
+                // Populate Customer list
                 DataTable dtPelanggan = sewaService.AmbilSemuaPelanggan();
                 cmb_pelanggan.DataSource = dtPelanggan;
                 cmb_pelanggan.DisplayMember = "nama_pelanggan";
                 cmb_pelanggan.ValueMember = "id_pelanggan";
-                cmb_pelanggan.SelectedIndex = -1; // Kosongkan pilihan awal
+                cmb_pelanggan.SelectedIndex = -1;
 
-                // Isi ComboBox Mobil (Hanya yang berstatus 'Tersedia')
-                DataTable dtMobil = sewaService.AmbilMobilTersedia();
+                // Populate Cars list (only available)
+                DataTable dtMobil = sewaService.AmMobilTersedia();
                 cmb_mobil.DataSource = dtMobil;
                 cmb_mobil.DisplayMember = "merk";
                 cmb_mobil.ValueMember = "id_mobil";
-                cmb_mobil.SelectedIndex = -1; // Kosongkan pilihan awal
+                cmb_mobil.SelectedIndex = -1;
 
-                // Reset nilai inputan
+                // Reset outputs
                 txt_lama_sewa.Clear();
                 txt_total.Clear();
                 hargaMobilTerpilih = 0;
+                if (cmb_jaminan != null) cmb_jaminan.SelectedIndex = -1;
 
-                // Set tanggal ke hari ini
+                // Reset date pickers to today
                 dtp_tgl_sewa.Value = DateTime.Now;
                 dtp_tgl_kembali.Value = DateTime.Now;
             }
@@ -66,64 +114,58 @@ namespace siremob.view
             }
         }
 
-        // 2. LOGIKA HITUNG OTOMATIS LAMA SEWA & TOTAL BIAYA
         private void HitungEstimasiBiaya()
         {
-            // Validasi jika mobil belum dipilih, jangan hitung dulu
             if (cmb_mobil.SelectedIndex == -1) return;
 
             DateTime tglSewa = dtp_tgl_sewa.Value.Date;
             DateTime tglKembali = dtp_tgl_kembali.Value.Date;
 
-            // Hitung selisih hari
             TimeSpan selisih = tglKembali - tglSewa;
             int lamaSewa = selisih.Days;
 
-            // Mencegah nilai minus jika tanggal kembali lebih awal dari tanggal sewa
             if (lamaSewa < 0)
             {
                 lamaSewa = 0;
             }
 
             txt_lama_sewa.Text = lamaSewa.ToString();
-
-            // Hitung total biaya (Lama Sewa x Harga Mobil per Hari)
             decimal totalBiaya = lamaSewa * hargaMobilTerpilih;
-            txt_total.Text = totalBiaya.ToString();
+            txt_total.Text = totalBiaya.ToString("F0");
         }
 
-        // EVENT: Ketika tanggal sewa diubah oleh user
         private void dtp_tgl_sewa_ValueChanged(object sender, EventArgs e)
         {
             HitungEstimasiBiaya();
         }
 
-        // EVENT: Ketika tanggal kembali diubah oleh user
         private void dtp_tgl_kembali_ValueChanged(object sender, EventArgs e)
         {
             HitungEstimasiBiaya();
         }
 
-        // EVENT: Ketika pilihan mobil diganti (untuk mengambil harga_sewa mobil tersebut)
         private void cmb_mobil_SelectedIndexChanged(object sender, EventArgs e)
         {
             if (cmb_mobil.SelectedIndex != -1 && cmb_mobil.SelectedItem is DataRowView)
             {
                 DataRowView row = (DataRowView)cmb_mobil.SelectedItem;
                 hargaMobilTerpilih = Convert.ToDecimal(row["harga_sewa"]);
-
-                // Hitung ulang biaya karena harga mobilnya berubah
                 HitungEstimasiBiaya();
             }
         }
 
-        // 3. EVENT TOMBOL SIMPAN KLIK
         private void btnSimpan_Click(object sender, EventArgs e)
         {
-            // Validasi input wajib
+            // Validations
             if (cmb_pelanggan.SelectedIndex == -1 || cmb_mobil.SelectedIndex == -1 || string.IsNullOrEmpty(txt_total.Text))
             {
                 MessageBox.Show("Harap lengkapi data Pelanggan, Mobil, dan Tanggal terlebih dahulu!", "Peringatan", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            if (cmb_jaminan.SelectedIndex == -1)
+            {
+                MessageBox.Show("Gagal Menyimpan! Jaminan (KTP/KK/Kendaraan Pribadi) belum dipilih.", "Peringatan", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
@@ -136,31 +178,66 @@ namespace siremob.view
                 return;
             }
 
-            // Siapkan data untuk dikirim ke Service
-            // Catatan: Untuk idRental "R01" ini dummy, jika Anda punya txtIdRental silakan ganti ke txtIdRental.Text
-            string idRental = "R01";
-            string idMobil = cmb_mobil.SelectedValue.ToString();
-            string idPelanggan = cmb_pelanggan.SelectedValue.ToString();
-            decimal totalBiaya = Convert.ToDecimal(txt_total.Text);
-
-            // Panggil fungsi simpan yang ada di transaksirental_serve
-            bool apakahSukses = sewaService.SimpanTransaksiSewa(idRental, idMobil, idPelanggan, tglSewa, tglKembali, totalBiaya);
-
-            if (apakahSukses)
+            try
             {
-                MessageBox.Show("Transaksi Rental berhasil disimpan! Status mobil otomatis berubah menjadi 'Disewa'.", "Sukses", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                RefreshHalaman(); // Segarkan isi tabel dan kosongkan form
+                string idRental = currentIdRental;
+                string idMobil = cmb_mobil.SelectedValue.ToString();
+                string idPelanggan = cmb_pelanggan.SelectedValue.ToString();
+                decimal totalBiaya = Convert.ToDecimal(txt_total.Text);
+                string jaminan = cmb_jaminan.SelectedItem.ToString();
+
+                bool apakahSukses = sewaService.SimpanTransaksiSewa(idRental, idMobil, idPelanggan, tglSewa, tglKembali, totalBiaya, jaminan);
+
+                if (apakahSukses)
+                {
+                    MessageBox.Show("Transaksi Rental berhasil disimpan! Status mobil otomatis berubah menjadi 'Disewa'.", "Sukses", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    RefreshHalaman();
+                }
+                else
+                {
+                    MessageBox.Show("Gagal menyimpan transaksi! Periksa kembali data Anda.", "Gagal", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
             }
-            else
+            catch (Exception ex)
             {
-                MessageBox.Show("Gagal menyimpan transaksi! Periksa kembali koneksi atau data database Anda.", "Gagal", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Error saat menyimpan transaksi: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
-        // 4. EVENT TOMBOL BATAL KLIK
         private void btnBatal_Click(object sender, EventArgs e)
         {
-            RefreshHalaman();
+            DialogResult result = MessageBox.Show("Apakah Anda yakin ingin membatalkan transaksi ini? Semua data yang diinput akan dibersihkan.", "Konfirmasi Batal", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+            if (result == DialogResult.Yes)
+            {
+                RefreshHalaman();
+            }
+        }
+
+        private void btnCari_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                string keyword = txb_cari.Text.Trim();
+                if (string.IsNullOrEmpty(keyword))
+                {
+                    dgv_transaksi.DataSource = sewaService.TampilkanDaftarRental();
+                }
+                else
+                {
+                    string query = $@"SELECT r.id_rental, p.nama AS nama_pelanggan, m.merk AS Mobil, 
+                                            r.tanggalsewa, r.tanggalkembali_rencana, 
+                                            r.totalbiaya_estimasi, r.statusrental 
+                                     FROM rental r
+                                     INNER JOIN pelanggan p ON r.id_pelanggan = p.id_pelanggan
+                                     INNER JOIN mobil m ON r.id_mobil = m.id_mobil
+                                     WHERE r.id_rental LIKE '%{keyword}%' OR p.nama LIKE '%{keyword}%' OR m.merk LIKE '%{keyword}%'";
+                    dgv_transaksi.DataSource = new Koneksi().EksekusiQuery(query);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Gagal mencari transaksi: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
     }
 }

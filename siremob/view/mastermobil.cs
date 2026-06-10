@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -27,6 +27,22 @@ namespace siremob.view
         private void mastermobil_Load(object sender, EventArgs e)
         {
             TampilkanData();
+            if (Session.Role == "Karyawan")
+            {
+                button_Tambah.Enabled = false;
+                button_Ubah.Enabled = false;
+                button_Hapus.Enabled = false;
+                button_Browse.Enabled = false;
+                
+                tbx_IdMobil.ReadOnly = true;
+                tbx_PlatNomor.ReadOnly = true;
+                tbx_Merk.ReadOnly = true;
+                tbx_Tipe.ReadOnly = true;
+                tbx_Warna.ReadOnly = true;
+                tbx_Harga.ReadOnly = true;
+                nud_Tahun.Enabled = false;
+                comboBox_Status.Enabled = false;
+            }
         }
 
         private void TampilkanData()

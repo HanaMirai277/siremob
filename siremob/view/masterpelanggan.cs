@@ -29,6 +29,8 @@ namespace siremob.view
             this.Load += new EventHandler(masterpelanggan_Load);
             button_Tambah.Click += new EventHandler(button_Tambah_Click);
             button_Ubah.Click += new EventHandler(button_Ubah_Click);
+            button_Hapus.Click += new EventHandler(button_Hapus_Click);
+            button_Batal.Click += new EventHandler(button_Batal_Click);
             button_Cari.Click += new EventHandler(button_Cari_Click);
             dataGridView1.CellClick += new DataGridViewCellEventHandler(dataGridView1_CellClick);
         }
