@@ -17,6 +17,27 @@ namespace siremob.service
         {
             _koneksi = new Koneksi();
         }
+        public string AmbilKodeOtomatis()
+        {
+            string kodeBaru = "M001"; 
+            string query = "SELECT MAX(RIGHT(id_mobil, 3)) FROM Mobil";
+
+            try
+            {
+                DataTable dt = _koneksi.EksekusiQuery(query);
+                if (dt != null && dt.Rows.Count > 0 && dt.Rows[0][0] != DBNull.Value)
+                {
+                    int noUrut = Convert.ToInt32(dt.Rows[0][0]) + 1;
+                    kodeBaru = "M" + noUrut.ToString("d3");
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Gagal membuat kode otomatis di layer service: " + ex.Message);
+            }
+
+            return kodeBaru;
+        }
 
         public DataTable TampilData()
         {
@@ -32,13 +53,23 @@ namespace siremob.service
 
         public void TambahData(mastermobil mm)
         {
-            string query = "INSERT INTO Mobil (id_mobil, platnomor, merk, tipe, tahun, warna, hargasewaperhari, statusmobil, foto) VALUES ('" + mm.id_mobil + "', '" + mm.platnomor + "', '" + mm.merk + "', '" + mm.tipe + "', " + mm.tahun + ", '" + mm.warna + "', " + mm.hargasewaperhari + ", '" + mm.statusmobil + "', '" + mm.foto + "')";
+            string amanFotoPath = mm.foto.Replace("\\", "\\\\");
+
+            string query = "INSERT INTO Mobil (id_mobil, platnomor, merk, tipe, tahun, warna, hargasewaperhari, statusmobil, foto) " +
+                           "VALUES ('" + mm.id_mobil + "', '" + mm.platnomor + "', '" + mm.merk + "', '" + mm.tipe + "', " + mm.tahun + ", " +
+                           "'" + mm.warna + "', " + mm.hargasewaperhari + ", '" + mm.statusmobil + "', '" + amanFotoPath + "')";
+
             _koneksi.EksekusiNonQuery(query);
         }
 
         public void UbahData(mastermobil mm)
         {
-            string query = "UPDATE Mobil SET platnomor = '" + mm.platnomor + "', merk = '" + mm.merk + "', tipe = '" + mm.tipe + "', tahun = " + mm.tahun + ", warna = '" + mm.warna + "', hargasewaperhari = " + mm.hargasewaperhari + ", statusmobil = '" + mm.statusmobil + "', foto = '" + mm.foto + "' WHERE id_mobil = '" + mm.id_mobil + "'";
+            string amanFotoPath = mm.foto.Replace("\\", "\\\\");
+
+            string query = "UPDATE Mobil SET platnomor = '" + mm.platnomor + "', merk = '" + mm.merk + "', tipe = '" + mm.tipe + "', " +
+                           "tahun = " + mm.tahun + ", warna = '" + mm.warna + "', hargasewaperhari = " + mm.hargasewaperhari + ", " +
+                           "statusmobil = '" + mm.statusmobil + "', foto = '" + amanFotoPath + "' WHERE id_mobil = '" + mm.id_mobil + "'";
+
             _koneksi.EksekusiNonQuery(query);
         }
 

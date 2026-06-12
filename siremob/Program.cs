@@ -18,7 +18,7 @@ namespace siremob
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new view.login());
+            Application.Run(new view.pengembalian_pembayaran());
         }
     }
 }
