@@ -21,7 +21,7 @@ namespace siremob.view
             
             // Wire up events
             this.Load += new EventHandler(financial_reports_Load);
-            btnFilter.Click += new EventHandler(btnFilter_Click);
+            btnTerapkan.Click += new EventHandler(btnFilter_Click);
             btnReset.Click += new EventHandler(btnReset_Click);
         }
 

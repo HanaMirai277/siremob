@@ -67,13 +67,36 @@ namespace siremob.view
 
             // Kosongkan kontrol lainnya
             cmb_idrental.SelectedIndex = -1;
-            txt_nama_pelanggan.Text = "";
-            txt_platnomor.Text = "";
-            txt_merk.Text = "";
-            txt_tipe.Text = "";
-            cmb_jaminan.SelectedIndex = -1;
-            txt_biayarental.Text = "0";
             dtp_tgl_kembaliaktual.Value = DateTime.Now;
+
+            txt_nama_pelanggan.Text = "";
+            txt_nama_pelanggan.ReadOnly = true; // Kunci agar tidak bisa diubah kasir
+
+            txt_platnomor.Text = "";
+            txt_platnomor.ReadOnly = true;
+
+            txt_merk.Text = "";
+            txt_merk.ReadOnly = true;
+
+            txt_tipe.Text = "";
+            txt_tipe.ReadOnly = true;
+
+            cmb_jaminan.SelectedIndex = -1;
+
+            txt_biayarental.Text = "0";
+            txt_biayarental.ReadOnly = true;
+
+            txt_keterlambatan_hari.Text = "0";
+            txt_keterlambatan_hari.ReadOnly = true;
+
+            txt_denda_keterlambatan.Text = "0";
+            txt_denda_keterlambatan.ReadOnly = true;
+
+            txt_denda_kerusakan.Text = "0";
+            txt_denda_kerusakan.ReadOnly = true; // Default awal terkunci sebelum kondisi dipilih
+
+            txt_total_bayar.Text = "0";
+            txt_total_bayar.ReadOnly = true;
 
             // Isi opsi kondisi mobil
             cmb_kondisimobil.Items.Clear(); // Bersihkan dulu agar tidak duplikat
@@ -82,11 +105,6 @@ namespace siremob.view
             cmb_kondisimobil.Items.Add("Rusak Ringan");
             cmb_kondisimobil.Items.Add("Rusak Berat");
             cmb_kondisimobil.SelectedIndex = -1;
-
-            txt_keterlambatan_hari.Text = "0";
-            txt_denda_keterlambatan.Text = "0";
-            txt_denda_kerusakan.Text = "0";
-            txt_total_bayar.Text = "0";
 
             // Isi opsi status pembayaran
             cmb_ststus_pembayaran.Items.Clear(); // Bersihkan dulu agar tidak duplikat
@@ -115,7 +133,7 @@ namespace siremob.view
                 return;
             }
 
-            // VALIDASI 2: Logika Kondisi Mobil vs Kolom Denda (Sesuai Alur Alur 3)
+            // VALIDASI 2: Logika Kondisi Mobil vs Kolom Denda 
             decimal.TryParse(txt_denda_kerusakan.Text.Replace(".", "").Replace(",", ""), out decimal dendaRusak);
             if ((cmb_kondisimobil.Text == "Lecet Ringan" || cmb_kondisimobil.Text == "Rusak Ringan" || cmb_kondisimobil.Text == "Rusak Berat") && dendaRusak == 0)
             {
@@ -152,7 +170,7 @@ namespace siremob.view
 
             if (sukses)
             {
-                // MESSAGE BOX SUKSES TERAKHIR (Sesuai Alur 3)
+                // MESSAGE BOX SUKSES TERAKHIR
                 MessageBox.Show($"Pembayaran Berhasil! Total diterima: Rp {pm.TotalBayar:N0}.\n\n" +
                                 $"Silakan kembalikan jaminan [{cmb_jaminan.Text}] kepada pelanggan.",
                                 "Sukses Transaksi", MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -181,19 +199,29 @@ namespace siremob.view
             if (cmb_kondisimobil.Text == "Baik")
             {
                 txt_denda_kerusakan.Text = "0";
-                txt_denda_kerusakan.ReadOnly = true; // Kunci biar tidak bisa diinput angka jika kondisinya Baik
+                txt_denda_kerusakan.ReadOnly = true; // Kunci total jika mobil aman
             }
-            else
+            else if (cmb_kondisimobil.Text == "Lecet Ringan")
             {
-                txt_denda_kerusakan.ReadOnly = false; // Buka kuncinya agar kasir bisa input nominal denda kerusakan
+                txt_denda_kerusakan.Text = "200000";
+                txt_denda_kerusakan.ReadOnly = false; // Buka agar kasir bisa menyesuaikan jika ada perubahan tarif bengkel
+            }
+            else if (cmb_kondisimobil.Text == "Rusak Ringan")
+            {
+                txt_denda_kerusakan.Text = "750000";
+                txt_denda_kerusakan.ReadOnly = false;
+            }
+            else if (cmb_kondisimobil.Text == "Rusak Berat")
+            {
+                txt_denda_kerusakan.Text = "3000000";
+                txt_denda_kerusakan.ReadOnly = false;
             }
             HitungKeterlambatanDanDenda();
         }
 
         private void cmb_ststus_pengembalian_SelectedIndexChanged(object sender, EventArgs e)
         {
-            cmb_ststus_pembayaran.Items.Add("Lunas");
-            cmb_ststus_pembayaran.Items.Add("Belum Lunas");
+           
         }
 
         private void cmb_idrental_SelectedIndexChanged(object sender, EventArgs e)
@@ -238,40 +266,41 @@ namespace siremob.view
             // Jika belum memilih ID Rental, hentikan perhitungan
             if (cmb_idrental.SelectedIndex == -1) return;
 
-            // Hitung Selisih Hari (Tanggal Aktual Kembali - Tanggal Rencana Kembali)
+            // 1. Hitung Selisih Hari (Tanggal Aktual Kembali - Tanggal Rencana Kembali)
             DateTime tglAktual = dtp_tgl_kembaliaktual.Value.Date;
             DateTime tglRencana = tanggalKembaliRencana.Date;
 
             TimeSpan selisih = tglAktual - tglRencana;
             int hariTelat = selisih.Days;
 
-            // Jika mengembalikan lebih cepat atau tepat waktu, hari telat dihitung 0
             if (hariTelat < 0)
             {
                 hariTelat = 0;
             }
-
             txt_keterlambatan_hari.Text = hariTelat.ToString();
 
-            // Hitung Denda Keterlambatan (Harga Mobil x Hari Telat)
+            // 2. Hitung Denda Keterlambatan (Harga Sewa Mobil Per Hari x Jumlah Hari Telat)
             decimal dendaTelat = hargaSewaPerHari * hariTelat;
             txt_denda_keterlambatan.Text = dendaTelat.ToString("N0");
 
-            // Ambil Nilai Denda Kerusakan (Default 0 jika kosong/bukan angka)
+            // 3. Ambil Nilai Denda Kerusakan yang tertera di form
             decimal dendaRusak = 0;
             if (!string.IsNullOrEmpty(txt_denda_kerusakan.Text))
-                {
-                    // Bersihkan karakter ribuan jika kasir mengetik manual menggunakan pemisah
-                    string cleanDendaRusak = txt_denda_kerusakan.Text.Replace(".", "").Replace(",", "");
-                    decimal.TryParse(cleanDendaRusak, out dendaRusak);
-                }
+            {
+                string cleanDendaRusak = txt_denda_kerusakan.Text.Replace(".", "").Replace(",", "");
+                decimal.TryParse(cleanDendaRusak, out dendaRusak);
+            }
 
-            // Ambil Nilai Total Biaya Rental Awal
-            string cleanBiayaRental = txt_total_bayar.Text.Replace(".", "").Replace(",", "");
-            decimal.TryParse(cleanBiayaRental, out decimal biayaRentalAwal);
+            // 4. Ambil Nilai Total Biaya Sewa Estimasi / Biaya Rental Utama dari database yang tampil di form
+            decimal biayaRentalAwal = 0;
+            if (!string.IsNullOrEmpty(txt_biayarental.Text))
+            {
+                string cleanBiayaRental = txt_biayarental.Text.Replace(".", "").Replace(",", "");
+                decimal.TryParse(cleanBiayaRental, out biayaRentalAwal);
+            }
 
-            // 4. Hitung Total Bayar Keseluruhan
-            decimal totalBayarKeseluruhan = dendaTelat + biayaRentalAwal + dendaRusak;
+            // 5. Hitung Total Bayar Keseluruhan (Biaya Sewa + Denda Keterlambatan + Denda Kerusakan)
+            decimal totalBayarKeseluruhan = biayaRentalAwal + dendaTelat + dendaRusak;
             txt_total_bayar.Text = totalBayarKeseluruhan.ToString("N0");
         }
 
@@ -283,6 +312,11 @@ namespace siremob.view
         private void txt_denda_kerusakan_TextChanged(object sender, EventArgs e)
         {
             HitungKeterlambatanDanDenda();
+        }
+
+        private void txt_denda_keterlambatan_TextChanged(object sender, EventArgs e)
+        {
+
         }
     }
 }
