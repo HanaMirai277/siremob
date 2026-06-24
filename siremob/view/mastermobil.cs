@@ -16,7 +16,8 @@ namespace siremob.view
     public partial class mastermobil : Form
     {
         private mastermobil_serve _service;
-        private string _fotoPath = "";
+        private string _fotoPath = "";          // path asli foto yang dipilih user lewat Browse
+        private string _fotoPathLama = "";      // path foto lama saat mode edit
 
         public mastermobil()
         {
@@ -44,6 +45,8 @@ namespace siremob.view
                 dgv_Mobil.Columns["colWarna"].DataPropertyName = "warna";
                 dgv_Mobil.Columns["colHarga"].DataPropertyName = "hargasewaperhari";
                 dgv_Mobil.Columns["colStatus"].DataPropertyName = "statusmobil";
+                if (dgv_Mobil.Columns["colFoto"] != null)
+                    dgv_Mobil.Columns["colFoto"].DataPropertyName = "foto";
 
                 DataTable dt = _service.TampilData();
                 dgv_Mobil.DataSource = dt;
@@ -59,7 +62,6 @@ namespace siremob.view
             try
             {
                 string kodeOtomatis = _service.AmbilKodeOtomatis();
-
                 tbx_IdMobil.Text = kodeOtomatis;
                 tbx_IdMobil.ReadOnly = true;
             }
@@ -93,6 +95,12 @@ namespace siremob.view
 
                 model.mastermobil mm = AmbilDataDariForm();
 
+                // Kalau user pilih foto, simpan ke folder assets dengan nama ID
+                if (!string.IsNullOrEmpty(_fotoPath) && File.Exists(_fotoPath))
+                {
+                    _service.SimpanFotoKeAssets(_fotoPath, mm.id_mobil);
+                }
+
                 _service.TambahData(mm);
                 MessageBox.Show("Data berhasil ditambahkan!", "Sukses", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
@@ -123,10 +131,10 @@ namespace siremob.view
 
                 model.mastermobil mm = AmbilDataDariForm();
 
-
-                if (string.IsNullOrEmpty(_fotoPath))
+                // Kalau user pilih foto baru, simpan ke assets
+                if (!string.IsNullOrEmpty(_fotoPath) && File.Exists(_fotoPath))
                 {
-                    mm.foto = pbx_Foto.Text;
+                    _service.SimpanFotoKeAssets(_fotoPath, mm.id_mobil);
                 }
 
                 _service.UbahData(mm);
@@ -151,13 +159,15 @@ namespace siremob.view
                     return;
                 }
 
-                DialogResult result = MessageBox.Show("Apakah Anda yakin ingin menghapus data ini?", "Konfirmasi", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                DialogResult result = MessageBox.Show(
+                    "Apakah Anda yakin ingin menghapus data ini?\nID mobil lain akan diurut ulang secara otomatis.",
+                    "Konfirmasi", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+
                 if (result == DialogResult.Yes)
                 {
                     ResetSesiGambar();
-
-                    _service.HapusData(tbx_IdMobil.Text);
-                    MessageBox.Show("Data berhasil dihapus!", "Sukses", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    _service.HapusData(tbx_IdMobil.Text); // hapus + urut ulang otomatis
+                    MessageBox.Show("Data berhasil dihapus! ID mobil telah diurut ulang.", "Sukses", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
                     BersihkanForm();
                     TampilkanData();
@@ -174,6 +184,7 @@ namespace siremob.view
             BersihkanForm();
         }
 
+        // Browse foto → langsung preview di PictureBox
         private void button_Browse_Click(object sender, EventArgs e)
         {
             try
@@ -185,6 +196,7 @@ namespace siremob.view
                     if (ofd.ShowDialog() == DialogResult.OK)
                     {
                         _fotoPath = ofd.FileName;
+                        textBox_Foto.Text = Path.GetFileName(_fotoPath);
                         MuatGambarSecaraAman(_fotoPath);
                     }
                 }
@@ -195,6 +207,7 @@ namespace siremob.view
             }
         }
 
+        // Klik baris di tabel → isi form + tampilkan foto dari assets
         private void dataGridView_Mobil_CellClick(object sender, DataGridViewCellEventArgs e)
         {
             if (e.RowIndex < 0) return;
@@ -211,10 +224,24 @@ namespace siremob.view
                 tbx_Harga.Text = row.Cells["colHarga"].Value?.ToString();
                 comboBox_Status.Text = row.Cells["colStatus"].Value?.ToString();
 
-                string fotoPathDariGrid = row.Cells["colFoto"].Value?.ToString() ?? "";
-                MuatGambarSecaraAman(fotoPathDariGrid);
+                // Cari foto otomatis dari folder assets berdasarkan ID mobil
+                string idMobil = tbx_IdMobil.Text;
+                string pathFoto = _service.CariPathFoto(idMobil);
 
-                _fotoPath = ""; 
+                if (!string.IsNullOrEmpty(pathFoto))
+                {
+                    textBox_Foto.Text = Path.GetFileName(pathFoto);
+                    MuatGambarSecaraAman(pathFoto);
+                    _fotoPathLama = pathFoto;
+                }
+                else
+                {
+                    ResetSesiGambar();
+                    textBox_Foto.Text = "(tidak ada foto)";
+                    _fotoPathLama = "";
+                }
+
+                _fotoPath = "";
             }
             catch (Exception ex)
             {
@@ -256,7 +283,7 @@ namespace siremob.view
             mm.warna = tbx_Warna.Text.Trim();
             mm.hargasewaperhari = hargaSewa;
             mm.statusmobil = comboBox_Status.Text;
-            mm.foto = _fotoPath;
+            mm.foto = mm.id_mobil; // nama foto = ID mobil
             return mm;
         }
 
@@ -275,7 +302,6 @@ namespace siremob.view
             ResetSesiGambar();
             if (!string.IsNullOrEmpty(path) && File.Exists(path))
             {
-                pbx_Foto.Text = path;
                 using (FileStream fs = new FileStream(path, FileMode.Open, FileAccess.Read))
                 {
                     pbx_Foto.Image = Image.FromStream(fs);
@@ -290,7 +316,7 @@ namespace siremob.view
                 pbx_Foto.Image.Dispose();
                 pbx_Foto.Image = null;
             }
-            pbx_Foto.Text = "";
+            textBox_Foto.Text = "";
         }
 
         private void BersihkanForm()
@@ -306,9 +332,9 @@ namespace siremob.view
 
             ResetSesiGambar();
             _fotoPath = "";
+            _fotoPathLama = "";
 
             SetIdMobilOtomatis();
-
             tbx_PlatNomor.Focus();
         }
 
