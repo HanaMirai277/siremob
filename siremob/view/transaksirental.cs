@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using siremob.service;
 using siremob.konfigurasi;
+using siremob.model;
 
 namespace siremob.view
 {
@@ -18,21 +19,18 @@ namespace siremob.view
         private decimal hargaMobilTerpilih = 0;
         private string currentIdRental = "";
 
-        // Jaminan Controls
         private ComboBox cmb_jaminan;
         private Label lbl_jaminan;
 
         public transaksirental()
         {
             InitializeComponent();
+
+            txt_lama_sewa.ReadOnly = true;
+            txt_total.ReadOnly = true;
             
-            // Inject Jaminan controls dynamically
             InisialisasiJaminanControl();
 
-            // Bind events
-            this.Load += new EventHandler(rental_Load);
-            btn_batal.Click += new EventHandler(btnBatal_Click);
-            btn_simpan.Click += new EventHandler(btnSimpan_Click);
             btn_cari.Click += new EventHandler(btnCari_Click);
         }
 
@@ -58,9 +56,22 @@ namespace siremob.view
             panel2.Controls.Add(cmb_jaminan);
         }
 
+        private void AturAksesBerdasarkanRole()
+        {
+            bool bolehInput = Session.Role == "Karyawan";
+
+            btn_simpan.Enabled = bolehInput;
+            cmb_pelanggan.Enabled = bolehInput;
+            cmb_mobil.Enabled = bolehInput;
+            dtp_tgl_sewa.Enabled = bolehInput;
+            dtp_tgl_kembali.Enabled = bolehInput;
+            if (cmb_jaminan != null) cmb_jaminan.Enabled = bolehInput;
+
+            lblModeAkses.Visible = !bolehInput;
+        }
+
         private void rental_Load(object sender, EventArgs e)
         {
-            // Bind grid columns property names
             dgv_transaksi.AutoGenerateColumns = false;
             dgv_transaksi.Columns["colIdMobil"].DataPropertyName = "id_rental";
             dgv_transaksi.Columns["colPlatNomor"].DataPropertyName = "nama_pelanggan";
@@ -70,6 +81,7 @@ namespace siremob.view
             dgv_transaksi.Columns["colWarna"].DataPropertyName = "totalbiaya_estimasi";
             dgv_transaksi.Columns["colHarga"].DataPropertyName = "statusrental";
 
+            AturAksesBerdasarkanRole();
             RefreshHalaman();
         }
 
@@ -77,34 +89,28 @@ namespace siremob.view
         {
             try
             {
-                // Generate next rental ID
                 currentIdRental = sewaService.GetNextIdRental();
                 label1.Text = $"Transaksi Rental - {currentIdRental}";
 
-                // Refresh history grid
                 dgv_transaksi.DataSource = sewaService.TampilkanDaftarRental();
 
-                // Populate Customer list
                 DataTable dtPelanggan = sewaService.AmbilSemuaPelanggan();
                 cmb_pelanggan.DataSource = dtPelanggan;
                 cmb_pelanggan.DisplayMember = "nama_pelanggan";
                 cmb_pelanggan.ValueMember = "id_pelanggan";
                 cmb_pelanggan.SelectedIndex = -1;
 
-                // Populate Cars list (only available)
                 DataTable dtMobil = sewaService.AmMobilTersedia();
                 cmb_mobil.DataSource = dtMobil;
                 cmb_mobil.DisplayMember = "merk";
                 cmb_mobil.ValueMember = "id_mobil";
                 cmb_mobil.SelectedIndex = -1;
 
-                // Reset outputs
                 txt_lama_sewa.Clear();
                 txt_total.Clear();
                 hargaMobilTerpilih = 0;
                 if (cmb_jaminan != null) cmb_jaminan.SelectedIndex = -1;
 
-                // Reset date pickers to today
                 dtp_tgl_sewa.Value = DateTime.Now;
                 dtp_tgl_kembali.Value = DateTime.Now;
             }
@@ -156,7 +162,12 @@ namespace siremob.view
 
         private void btnSimpan_Click(object sender, EventArgs e)
         {
-            // Validations
+            if (Session.Role != "Karyawan")
+            {
+                MessageBox.Show("Hanya Karyawan (Kasir) yang memiliki hak akses untuk menyimpan transaksi rental!", "Akses Ditolak", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
             if (cmb_pelanggan.SelectedIndex == -1 || cmb_mobil.SelectedIndex == -1 || string.IsNullOrEmpty(txt_total.Text))
             {
                 MessageBox.Show("Harap lengkapi data Pelanggan, Mobil, dan Tanggal terlebih dahulu!", "Peringatan", MessageBoxButtons.OK, MessageBoxIcon.Warning);
@@ -180,13 +191,19 @@ namespace siremob.view
 
             try
             {
-                string idRental = currentIdRental;
-                string idMobil = cmb_mobil.SelectedValue.ToString();
-                string idPelanggan = cmb_pelanggan.SelectedValue.ToString();
-                decimal totalBiaya = Convert.ToDecimal(txt_total.Text);
-                string jaminan = cmb_jaminan.SelectedItem.ToString();
+                model.transaksirental objekSewa = new model.transaksirental
+                {
+                    IdRental = currentIdRental,
+                    IdMobil = cmb_mobil.SelectedValue.ToString(),
+                    IdPelanggan = cmb_pelanggan.SelectedValue.ToString(),
+                    TanggalSewa = tglSewa,
+                    TanggalKembaliRencana = tglKembali,
+                    TotalBiayaEstimasi = Convert.ToDecimal(txt_total.Text),
+                    Jaminan = cmb_jaminan.SelectedItem.ToString(),
+                    StatusRental = "Berjalan"
+                };
 
-                bool apakahSukses = sewaService.SimpanTransaksiSewa(idRental, idMobil, idPelanggan, tglSewa, tglKembali, totalBiaya, jaminan);
+                bool apakahSukses = sewaService.SimpanTransaksiSewaDenganModel(objekSewa);
 
                 if (apakahSukses)
                 {
@@ -224,14 +241,7 @@ namespace siremob.view
                 }
                 else
                 {
-                    string query = $@"SELECT r.id_rental, p.nama AS nama_pelanggan, m.merk AS Mobil, 
-                                            r.tanggalsewa, r.tanggalkembali_rencana, 
-                                            r.totalbiaya_estimasi, r.statusrental 
-                                     FROM rental r
-                                     INNER JOIN pelanggan p ON r.id_pelanggan = p.id_pelanggan
-                                     INNER JOIN mobil m ON r.id_mobil = m.id_mobil
-                                     WHERE r.id_rental LIKE '%{keyword}%' OR p.nama LIKE '%{keyword}%' OR m.merk LIKE '%{keyword}%'";
-                    dgv_transaksi.DataSource = new Koneksi().EksekusiQuery(query);
+                    dgv_transaksi.DataSource = sewaService.CariTransaksiRental(keyword);
                 }
             }
             catch (Exception ex)

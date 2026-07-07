@@ -13,7 +13,6 @@ namespace siremob.service
     {
         private Koneksi koneksiDb = new Koneksi();
 
-        // GENERATE NEXT ID FOR RENTAL
         public string GetNextIdRental()
         {
             try
@@ -41,7 +40,6 @@ namespace siremob.service
         // 1. MENGAMBIL DATA PELANGGAN UNTUK COMBOBOX
         public DataTable AmbilSemuaPelanggan()
         {
-            // Database schema has column 'nama' not 'nama_pelanggan'
             string query = "SELECT id_pelanggan, nama AS nama_pelanggan FROM pelanggan";
             return koneksiDb.EksekusiQuery(query);
         }
@@ -49,12 +47,10 @@ namespace siremob.service
         // 2. MENGAMBIL DATA MOBIL YANG TERSEDIA UNTUK COMBOBOX
         public DataTable AmMobilTersedia()
         {
-            // Changed status to statusmobil and harga_sewa to hargasewaperhari based on schema
             string query = "SELECT id_mobil, merk, hargasewaperhari AS harga_sewa FROM mobil WHERE statusmobil = 'Tersedia'";
             return koneksiDb.EksekusiQuery(query);
         }
 
-        // Fallback for UI if it calls AmbilMobilTersedia
         public DataTable AmbilMobilTersedia()
         {
             return AmMobilTersedia();
@@ -78,15 +74,16 @@ namespace siremob.service
         {
             string sSewa = tglSewa.ToString("yyyy-MM-dd HH:mm:ss");
             string sKembali = tglKembali.ToString("yyyy-MM-dd HH:mm:ss");
-            string idPetugas = Session.IdPetugas ?? "003"; // fallback to kasir
+            string idPetugas = Session.IdPetugas ?? "003";
+            string sTotalBiaya = totalBiaya.ToString().Replace(",", ".");
 
             string queryInsert = $@"INSERT INTO rental (id_rental, id_mobil, id_pelanggan, id_petugas, tanggalsewa, tanggalkembali_rencana, jaminan, totalbiaya_estimasi, statusrental) 
-                                   VALUES ('{idRental}', '{idMobil}', '{idPelanggan}', '{idPetugas}', '{sSewa}', '{sKembali}', '{jaminan}', {totalBiaya}, 'Berjalan')";
+                                   VALUES ('{idRental}', '{idMobil}', '{idPelanggan}', '{idPetugas}', '{sSewa}', '{sKembali}', '{jaminan}', {sTotalBiaya}, 'Berjalan')";
 
             int rowsInserted = koneksiDb.EksekusiNonQuery(queryInsert);
             if (rowsInserted > 0)
             {
-                // Automatically change car status to 'Disewa'
+                // Mengubah status menjadi 'Disewa'
                 string queryUpdateMobil = $"UPDATE mobil SET statusmobil = 'Disewa' WHERE id_mobil = '{idMobil}'";
                 koneksiDb.EksekusiNonQuery(queryUpdateMobil);
                 return true;
@@ -97,6 +94,20 @@ namespace siremob.service
         public bool SimpanTransaksiSewaDenganModel(transaksirental objekSewa)
         {
             return SimpanTransaksiSewa(objekSewa.IdRental, objekSewa.IdMobil, objekSewa.IdPelanggan, objekSewa.TanggalSewa, objekSewa.TanggalKembaliRencana, objekSewa.TotalBiayaEstimasi, objekSewa.Jaminan);
+        }
+
+        // 5. MENCARI TRANSAKSI RENTAL (SERVICE LAYER)
+        public DataTable CariTransaksiRental(string keyword)
+        {
+            string escapedCari = keyword.Replace("'", "''");
+            string query = $@"SELECT r.id_rental, p.nama AS nama_pelanggan, m.merk AS Mobil, 
+                                    r.tanggalsewa, r.tanggalkembali_rencana, 
+                                    r.totalbiaya_estimasi, r.statusrental 
+                             FROM rental r
+                             INNER JOIN pelanggan p ON r.id_pelanggan = p.id_pelanggan
+                             INNER JOIN mobil m ON r.id_mobil = m.id_mobil
+                             WHERE r.id_rental LIKE '%{escapedCari}%' OR p.nama LIKE '%{escapedCari}%' OR m.merk LIKE '%{escapedCari}%'";
+            return koneksiDb.EksekusiQuery(query);
         }
     }
 }
