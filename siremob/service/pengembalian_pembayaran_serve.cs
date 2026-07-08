@@ -89,13 +89,13 @@ namespace siremob.service
         public DataTable TampilkanSemuaPengembalian()
         {
             query = @"SELECT 
-                        pg.id_pengembalian AS `ID Pengembalian`,
-                        pg.id_rental AS `ID Rental`,
-                        p.nama AS `Nama Pelanggan`,
-                        m.platnomor AS `Plat Nomor`,
-                        m.merk AS `Merk Mobil`,
-                        m.tipe AS `Tipe Mobil`,
-                        pg.tanggalkembali_aktual AS `Tanggal Kembali Aktual`
+                        pg.id_pengembalian AS 'ID Pengembalian',
+                        pg.id_rental AS 'ID Rental',
+                        p.nama AS 'Nama Pelanggan',
+                        m.platnomor AS 'Plat Nomor',
+                        m.merk AS 'Merk Mobil',
+                        m.tipe AS 'Tipe Mobil',
+                        pg.tanggalkembali_aktual AS 'Tanggal Kembali Aktual'
                       FROM pengembalian pg
                       INNER JOIN rental r ON pg.id_rental = r.id_rental
                       INNER JOIN pelanggan p ON r.id_pelanggan = p.id_pelanggan
