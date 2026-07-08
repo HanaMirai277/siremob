@@ -29,6 +29,7 @@
         private void InitializeComponent()
         {
             this.panel1 = new System.Windows.Forms.Panel();
+            this.lblModeAkses = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
             this.panel2 = new System.Windows.Forms.Panel();
             this.button_Batal = new System.Windows.Forms.Button();
@@ -64,12 +65,27 @@
             // panel1
             // 
             this.panel1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(45)))), ((int)(((byte)(90)))));
+            this.panel1.Controls.Add(this.lblModeAkses);
             this.panel1.Controls.Add(this.label1);
             this.panel1.Location = new System.Drawing.Point(0, 1);
             this.panel1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.panel1.Name = "panel1";
             this.panel1.Size = new System.Drawing.Size(1412, 114);
             this.panel1.TabIndex = 0;
+            // 
+            // lblModeAkses
+            // 
+            this.lblModeAkses.AutoSize = true;
+            this.lblModeAkses.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(200)))), ((int)(((byte)(80)))), ((int)(((byte)(80)))));
+            this.lblModeAkses.Font = new System.Drawing.Font("Segoe UI Semibold", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblModeAkses.ForeColor = System.Drawing.Color.White;
+            this.lblModeAkses.Location = new System.Drawing.Point(1170, 45);
+            this.lblModeAkses.Name = "lblModeAkses";
+            this.lblModeAkses.Padding = new System.Windows.Forms.Padding(8, 4, 8, 4);
+            this.lblModeAkses.Size = new System.Drawing.Size(60, 26);
+            this.lblModeAkses.TabIndex = 99;
+            this.lblModeAkses.Text = "Mode: Lihat Saja (Read Only)";
+            this.lblModeAkses.Visible = false;
             // 
             // label1
             // 
@@ -402,6 +418,7 @@
         private System.Windows.Forms.Button button_Ubah;
         private System.Windows.Forms.Button button_Hapus;
         private System.Windows.Forms.Button button_Batal;
+        private System.Windows.Forms.Label lblModeAkses;
         private System.Windows.Forms.DataGridView dataGridView1;
         private System.Windows.Forms.DataGridViewTextBoxColumn idpelanggan;
         private System.Windows.Forms.DataGridViewTextBoxColumn nik;

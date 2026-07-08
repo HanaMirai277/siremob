@@ -19,7 +19,7 @@ namespace siremob.view
         public masterpetugas()
         {
             InitializeComponent();
-            
+
             // Wire up event handlers dynamically
             this.Load += new EventHandler(masterpetugas_Load);
             btnTambah.Click += new EventHandler(btnTambah_Click);
@@ -32,6 +32,16 @@ namespace siremob.view
 
         private void masterpetugas_Load(object sender, EventArgs e)
         {
+            // Hanya Owner yang boleh mengelola akun petugas (Admin/Karyawan).
+            // Pengecekan ini sebagai lapisan keamanan tambahan; menu ini sendiri
+            // sudah disembunyikan di dashboard untuk role selain Owner.
+            if (Session.Role != "Owner")
+            {
+                MessageBox.Show("Hanya Owner yang memiliki akses Manajemen Akun Petugas!", "Akses Ditolak", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                this.BeginInvoke((MethodInvoker)(() => this.Close()));
+                return;
+            }
+
             TampilkanData();
             BersihkanForm();
         }
@@ -64,11 +74,11 @@ namespace siremob.view
             txtPassword.Clear();
             cmbRole.SelectedIndex = 0; // Default: Karyawan
             lblPassHelp.Visible = false;
-            
+
             btnTambah.Enabled = true;
             btnUbah.Enabled = false;
             btnHapus.Enabled = false;
-            
+
             txtNama.Focus();
         }
 
@@ -233,7 +243,7 @@ namespace siremob.view
                 txtNama.Text = row.Cells["colNama"].Value?.ToString();
                 txtUsername.Text = row.Cells["colUsername"].Value?.ToString();
                 cmbRole.Text = row.Cells["colRole"].Value?.ToString();
-                
+
                 txtPassword.Clear(); // clear for security, let them write new if they want to change
                 lblPassHelp.Visible = true;
 

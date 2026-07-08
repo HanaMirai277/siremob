@@ -57,6 +57,7 @@
             this.colWarna = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.colHarga = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.colStatus = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.lblModeAkses = new System.Windows.Forms.Label();
             this.panel1.SuspendLayout();
             this.panel2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.nud_Tahun)).BeginInit();
@@ -67,6 +68,7 @@
             // panel1
             // 
             this.panel1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(45)))), ((int)(((byte)(90)))));
+            this.panel1.Controls.Add(this.lblModeAkses);
             this.panel1.Controls.Add(this.label1);
             this.panel1.Dock = System.Windows.Forms.DockStyle.Top;
             this.panel1.Location = new System.Drawing.Point(0, 0);
@@ -74,6 +76,20 @@
             this.panel1.Size = new System.Drawing.Size(1319, 80);
             this.panel1.TabIndex = 0;
             this.panel1.Paint += new System.Windows.Forms.PaintEventHandler(this.panel1_Paint);
+            // 
+            // lblModeAkses
+            // 
+            this.lblModeAkses.AutoSize = true;
+            this.lblModeAkses.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(200)))), ((int)(((byte)(80)))), ((int)(((byte)(80)))));
+            this.lblModeAkses.Font = new System.Drawing.Font("Segoe UI Semibold", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblModeAkses.ForeColor = System.Drawing.Color.White;
+            this.lblModeAkses.Location = new System.Drawing.Point(1080, 30);
+            this.lblModeAkses.Name = "lblModeAkses";
+            this.lblModeAkses.Padding = new System.Windows.Forms.Padding(8, 4, 8, 4);
+            this.lblModeAkses.Size = new System.Drawing.Size(60, 26);
+            this.lblModeAkses.TabIndex = 99;
+            this.lblModeAkses.Text = "Mode: Lihat Saja (Read Only)";
+            this.lblModeAkses.Visible = false;
             // 
             // label1
             // 
@@ -571,6 +587,7 @@
         private System.Windows.Forms.Button btn_Cari;
         private System.Windows.Forms.DataGridView dgv_Mobil;
         private System.Windows.Forms.PictureBox pbx_Foto;
+        private System.Windows.Forms.Label lblModeAkses;
         private System.Windows.Forms.DataGridViewTextBoxColumn colIdMobil;
         private System.Windows.Forms.DataGridViewTextBoxColumn colPlatNomor;
         private System.Windows.Forms.DataGridViewTextBoxColumn colMerk;

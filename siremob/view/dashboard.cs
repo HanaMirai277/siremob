@@ -128,11 +128,21 @@ namespace siremob.view
 
         private void btnLaporan_Click(object sender, EventArgs e)
         {
+            if (Session.Role == "Karyawan")
+            {
+                MessageBox.Show("Karyawan tidak memiliki hak akses untuk membuka Laporan Keuangan!", "Akses Ditolak", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
             BukaChildForm(new financial_reports(), "Laporan Keuangan & Omzet Toko");
         }
 
         private void btnKelolaPetugas_Click(object sender, EventArgs e)
         {
+            if (Session.Role != "Owner")
+            {
+                MessageBox.Show("Hanya Owner yang memiliki hak akses untuk mengelola akun petugas!", "Akses Ditolak", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
             BukaChildForm(new masterpetugas(), "Manajemen Akun Petugas");
         }
 

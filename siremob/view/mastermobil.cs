@@ -29,6 +29,39 @@ namespace siremob.view
         {
             TampilkanData();
             SetIdMobilOtomatis();
+            AturAksesBerdasarkanRole();
+        }
+
+        // Karyawan hanya boleh melihat (Read) daftar mobil.
+        // Admin & Owner memiliki hak penuh (Create/Update/Delete).
+        private void AturAksesBerdasarkanRole()
+        {
+            bool bolehKelola = Session.Role == "Admin" || Session.Role == "Owner";
+
+            btn_Tambah.Enabled = bolehKelola;
+            btn_Ubah.Enabled = bolehKelola;
+            btn_Hapus.Enabled = bolehKelola;
+            btn_Browse.Enabled = bolehKelola;
+
+            // Kunci semua field input supaya Karyawan tidak bisa mengubah data mobil,
+            // pencarian (tbx_Cari/btn_Cari) tetap aktif untuk semua role.
+            tbx_PlatNomor.ReadOnly = !bolehKelola;
+            tbx_Merk.ReadOnly = !bolehKelola;
+            tbx_Tipe.ReadOnly = !bolehKelola;
+            tbx_Warna.ReadOnly = !bolehKelola;
+            tbx_Harga.ReadOnly = !bolehKelola;
+            nud_Tahun.Enabled = bolehKelola;
+            comboBox_Status.Enabled = bolehKelola;
+
+            if (!bolehKelola)
+            {
+                lblModeAkses.Text = "Mode: Lihat Saja (Read Only)";
+                lblModeAkses.Visible = true;
+            }
+            else
+            {
+                lblModeAkses.Visible = false;
+            }
         }
 
         private void TampilkanData()
@@ -73,6 +106,12 @@ namespace siremob.view
 
         private void button_Tambah_Click(object sender, EventArgs e)
         {
+            if (Session.Role == "Karyawan")
+            {
+                MessageBox.Show("Karyawan hanya memiliki akses lihat (Read Only) untuk data mobil!", "Akses Ditolak", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
             try
             {
                 if (ApakahFormKosong())
@@ -115,6 +154,12 @@ namespace siremob.view
 
         private void button_Ubah_Click(object sender, EventArgs e)
         {
+            if (Session.Role == "Karyawan")
+            {
+                MessageBox.Show("Karyawan hanya memiliki akses lihat (Read Only) untuk data mobil!", "Akses Ditolak", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
             try
             {
                 if (string.IsNullOrWhiteSpace(tbx_IdMobil.Text))
@@ -151,6 +196,12 @@ namespace siremob.view
 
         private void button_Hapus_Click(object sender, EventArgs e)
         {
+            if (Session.Role == "Karyawan")
+            {
+                MessageBox.Show("Karyawan hanya memiliki akses lihat (Read Only) untuk data mobil!", "Akses Ditolak", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
             try
             {
                 if (string.IsNullOrWhiteSpace(tbx_IdMobil.Text))

@@ -185,6 +185,7 @@ namespace siremob.view
         private System.Windows.Forms.TextBox txtPassword;
         private System.Windows.Forms.Button btnLogin;
         private System.Windows.Forms.Button btnBatal;
+        private System.Windows.Forms.CheckBox chkShowPassword;
         private System.Windows.Forms.Panel panelHeader;
     }
 }

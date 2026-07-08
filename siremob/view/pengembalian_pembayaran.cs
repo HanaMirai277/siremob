@@ -57,6 +57,23 @@ namespace siremob.view
         private void pengembalian_pembayaran_Load(object sender, EventArgs e)
         {
             ResetForm();
+            AturAksesBerdasarkanRole();
+        }
+
+        // Karyawan: menginput data pengembalian & pembayaran secara penuh.
+        // Admin & Owner: hanya memonitor data pengembalian yang sudah diinput Karyawan (Read only).
+        private void AturAksesBerdasarkanRole()
+        {
+            bool bolehInput = Session.Role == "Karyawan";
+
+            btn_simpan.Enabled = bolehInput;
+            cmb_idrental.Enabled = bolehInput;
+            dtp_tgl_kembaliaktual.Enabled = bolehInput;
+            cmb_kondisimobil.Enabled = bolehInput;
+            cmb_ststus_pembayaran.Enabled = bolehInput;
+            txt_denda_kerusakan.Enabled = bolehInput;
+
+            lblModeAkses.Visible = !bolehInput;
         }
 
         private void ResetForm()
@@ -126,6 +143,12 @@ namespace siremob.view
 
         private void btn_simpan_Click(object sender, EventArgs e)
         {
+            if (Session.Role != "Karyawan")
+            {
+                MessageBox.Show("Admin/Owner hanya memiliki akses monitoring (Read Only) untuk data pengembalian!", "Akses Ditolak", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
             // VALIDASI 1: Pastikan ID Rental sudah dipilih
             if (cmb_idrental.SelectedIndex == -1)
             {
@@ -287,6 +310,10 @@ namespace siremob.view
             decimal dendaRusak = 0;
             if (!string.IsNullOrEmpty(txt_denda_kerusakan.Text))
             {
+<<<<<<< HEAD
+=======
+                // Bersihkan karakter ribuan jika kasir mengetik manual menggunakan pemisah
+>>>>>>> 0339113ac06a1716b6109ad1c699042b9a00b065
                 string cleanDendaRusak = txt_denda_kerusakan.Text.Replace(".", "").Replace(",", "");
                 decimal.TryParse(cleanDendaRusak, out dendaRusak);
             }

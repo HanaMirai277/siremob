@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using siremob.konfigurasi;
+using siremob.model;
 
 namespace siremob.view
 {
@@ -18,7 +19,7 @@ namespace siremob.view
         public financial_reports()
         {
             InitializeComponent();
-            
+
             // Wire up events
             this.Load += new EventHandler(financial_reports_Load);
             btnFilter.Click += new EventHandler(btnFilter_Click);
@@ -29,7 +30,26 @@ namespace siremob.view
         {
             dtpDari.Value = DateTime.Now.AddDays(-30);
             dtpSampai.Value = DateTime.Now;
+            AturAksesBerdasarkanRole();
             TampilkanDataLaporan();
+        }
+
+        // Admin: laporan omzet harian/bulanan (tarif sewa & total omzet) sesuai spesifikasi.
+        // Owner: analisis keuangan tingkat lanjut, termasuk rincian pendapatan dari denda
+        // keterlambatan & kerusakan (dari tabel pengembalian).
+        private void AturAksesBerdasarkanRole()
+        {
+            if (Session.Role == "Karyawan")
+            {
+                MessageBox.Show("Karyawan tidak memiliki akses untuk melihat laporan keuangan!", "Akses Ditolak", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                this.BeginInvoke((MethodInvoker)(() => this.Close()));
+                return;
+            }
+
+            bool isOwner = Session.Role == "Owner";
+
+            cardDendaKeterlambatanPanel.Visible = isOwner;
+            cardDendaKerusakanPanel.Visible = isOwner;
         }
 
         private void TampilkanDataLaporan(string queryFilter = "")

@@ -63,10 +63,54 @@ namespace siremob.view
             }
         }
 
+        private void AturAksesBerdasarkanRole()
+        {
+            bool bolehKelola = Session.Role == "Karyawan";
+
+            button_Tambah.Enabled = bolehKelola;
+            button_Ubah.Enabled = bolehKelola;
+            button_Hapus.Enabled = bolehKelola;
+
+            // Kunci semua field input agar non-karyawan tidak bisa mengubah data pelanggan
+            textBox1.ReadOnly = true; // Selalu read only untuk ID otomatis
+            textBox2.ReadOnly = !bolehKelola;
+            textBox3.ReadOnly = !bolehKelola;
+            textBox4.ReadOnly = !bolehKelola;
+            textBox5.ReadOnly = !bolehKelola;
+            TextBoxNoSIM.ReadOnly = !bolehKelola;
+
+            // Buat label status dinamis di header panel jika belum ada
+            Control[] lblAkses = this.Controls.Find("lblModeAkses", true);
+            if (lblAkses.Length > 0 && lblAkses[0] is Label lbl)
+            {
+                lbl.Text = "Mode: Lihat Saja (Read Only)";
+                lbl.Visible = !bolehKelola;
+            }
+            else
+            {
+                Control[] panels = this.Controls.Find("panel1", true);
+                if (panels.Length > 0 && panels[0] is Panel p)
+                {
+                    Label dynamicLabel = new Label();
+                    dynamicLabel.Name = "lblModeAkses";
+                    dynamicLabel.Text = "Mode: Lihat Saja (Read Only)";
+                    dynamicLabel.BackColor = Color.FromArgb(200, 80, 80);
+                    dynamicLabel.ForeColor = Color.White;
+                    dynamicLabel.Font = new Font("Segoe UI Semibold", 9F, FontStyle.Bold);
+                    dynamicLabel.Location = new Point(1080, 30);
+                    dynamicLabel.AutoSize = true;
+                    dynamicLabel.Padding = new Padding(8, 4, 8, 4);
+                    dynamicLabel.Visible = !bolehKelola;
+                    p.Controls.Add(dynamicLabel);
+                }
+            }
+        }
+
         private void masterpelanggan_Load(object sender, EventArgs e)
         {
             TampilkanData();
             textBox1.Text = _service.GetNextIdPelanggan();
+            AturAksesBerdasarkanRole();
         }
 
         private void TampilkanData()
@@ -153,11 +197,21 @@ namespace siremob.view
 
         private void button_Tambah_Click(object sender, EventArgs e)
         {
+            if (Session.Role != "Karyawan")
+            {
+                MessageBox.Show("Hanya Karyawan (Kasir) yang memiliki hak akses untuk menambah data pelanggan!", "Akses Ditolak", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
             SimpanDataPenyewa();
         }
 
         private void button_Ubah_Click(object sender, EventArgs e)
         {
+            if (Session.Role != "Karyawan")
+            {
+                MessageBox.Show("Hanya Karyawan (Kasir) yang memiliki hak akses untuk mengubah data pelanggan!", "Akses Ditolak", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
             try
             {
                 if (string.IsNullOrWhiteSpace(textBox1.Text))
@@ -205,6 +259,11 @@ namespace siremob.view
 
         private void button_Hapus_Click(object sender, EventArgs e)
         {
+            if (Session.Role != "Karyawan")
+            {
+                MessageBox.Show("Hanya Karyawan (Kasir) yang memiliki hak akses untuk menghapus data pelanggan!", "Akses Ditolak", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
             try
             {
                 if (string.IsNullOrWhiteSpace(textBox1.Text))

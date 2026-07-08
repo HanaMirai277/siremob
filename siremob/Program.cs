@@ -18,7 +18,7 @@ namespace siremob
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new view.mastermobil());
+            Application.Run(new view.splash());
         }
     }
 }
