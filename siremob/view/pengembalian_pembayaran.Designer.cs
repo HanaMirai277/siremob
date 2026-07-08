@@ -302,6 +302,7 @@
             this.txt_denda_keterlambatan.Name = "txt_denda_keterlambatan";
             this.txt_denda_keterlambatan.Size = new System.Drawing.Size(299, 30);
             this.txt_denda_keterlambatan.TabIndex = 11;
+            this.txt_denda_keterlambatan.TextChanged += new System.EventHandler(this.txt_denda_keterlambatan_TextChanged);
             // 
             // label8
             // 
